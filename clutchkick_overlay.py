@@ -172,6 +172,23 @@ def create_overlay():
     canvas_widget.configure(bg='#121212', highlightthickness=0, bd=0)
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+
+    # Spacer to separate graph from version text
+    spacer = tk.Frame(display_frame, height=2, bg="#121212")
+    spacer.pack(side=tk.TOP)
+
+    # Version Label
+    local_version = get_local_version()
+    version_label = tk.Label(
+        display_frame,
+        text=f"v{local_version}",
+        font=("Arial", 8),  # More universal fallback font
+        fg="#888888",
+        bg="#121212"
+    )
+    version_label.pack(side=tk.TOP, pady=(0, 4))
+
+
     # Brake Bias Label
     label = tk.Label(
         display_frame,
