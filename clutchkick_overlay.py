@@ -2,6 +2,63 @@ import irsdk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+import os
+import sys
+import requests
+
+GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jackninety9/clutchkick-overlay/main/"
+SCRIPT_NAME = "clutchkick_overlay.py"
+LOCAL_VERSION_FILE = "local_version.txt"
+
+def get_remote_version():
+    try:
+        response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
+        if response.status_code == 200:
+            return response.text.strip()
+    except Exception as e:
+        print("Error fetching remote version:", e)
+    return None
+
+def get_local_version():
+    try:
+        with open(LOCAL_VERSION_FILE, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        return "0.0.0"
+
+def update_script():
+    try:
+        response = requests.get(GITHUB_RAW_BASE + SCRIPT_NAME, timeout=10)
+        if response.status_code == 200:
+            with open(SCRIPT_NAME, "w", encoding="utf-8") as f:
+                f.write(response.text)
+            print("Script updated successfully.")
+            return True
+    except Exception as e:
+        print("Failed to update script:", e)
+    return False
+
+def write_local_version(version):
+    with open(LOCAL_VERSION_FILE, "w") as f:
+        f.write(version)
+
+def check_for_update():
+    remote_version = get_remote_version()
+    local_version = get_local_version()
+    
+    if remote_version and remote_version != local_version:
+        print(f"Update available: {local_version} → {remote_version}")
+        if update_script():
+            write_local_version(remote_version)
+            print("Restarting with updated script...")
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+        else:
+            print("Update failed.")
+    else:
+        print("Script is up to date.")
+
+check_for_update()
+
 
 # Initialize the iRacing SDK object
 ir = irsdk.IRSDK()
