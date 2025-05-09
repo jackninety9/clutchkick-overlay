@@ -1,36 +1,69 @@
+import requests
 import os
 import sys
 import time
-import requests
+import shutil
+import subprocess
 
+GITHUB_RAW_VERSION = "https://raw.githubusercontent.com/jackninety9/clutchkick-overlay/main/version.txt"
 GITHUB_EXE_URL = "https://github.com/jackninety9/clutchkick-overlay/raw/main/clutchkick_overlay.exe"
 
-def download_latest_exe(destination_path):
-    response = requests.get(GITHUB_EXE_URL, stream=True)
-    if response.status_code == 200:
-        with open(destination_path, 'wb') as f:
-            for chunk in response.iter_content(1024):
-                f.write(chunk)
-        return True
+def get_local_version(path):
+    try:
+        with open(path, "r") as f:
+            return f.read().strip()
+    except:
+        return "0.0.0"
+
+def write_local_version(path, version):
+    with open(path, "w") as f:
+        f.write(version)
+
+def get_remote_version():
+    try:
+        r = requests.get(GITHUB_RAW_VERSION, timeout=5)
+        if r.status_code == 200:
+            return r.text.strip()
+    except:
+        return None
+
+def download_new_exe(target_path):
+    try:
+        r = requests.get(GITHUB_EXE_URL, stream=True, timeout=10)
+        if r.status_code == 200:
+            with open(target_path, "wb") as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            return True
+    except:
+        pass
     return False
 
+def main():
+    exe_dir = os.path.dirname(sys.executable if getattr(sys, 'frozen', False) else __file__)
+    local_version_path = os.path.join(exe_dir, "local_version.txt")
+    exe_path = os.path.join(exe_dir, "clutchkick_overlay.exe")
+    temp_path = os.path.join(exe_dir, "new_overlay.exe")
+
+    local_version = get_local_version(local_version_path)
+    remote_version = get_remote_version()
+
+    if not remote_version or remote_version == local_version:
+        return  # Up to date or failed to fetch
+
+    print(f"Updating from v{local_version} to v{remote_version}...")
+
+    if download_new_exe(temp_path):
+        try:
+            time.sleep(1)  # Give main exe time to exit if needed
+            if os.path.exists(exe_path):
+                os.remove(exe_path)
+            shutil.move(temp_path, exe_path)
+            write_local_version(local_version_path, remote_version)
+            subprocess.Popen([exe_path])
+            sys.exit(0)
+        except Exception as e:
+            print("Update failed:", e)
+
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: update_helper.exe <new_version> <target_exe_path>")
-        sys.exit(1)
-
-    new_version = sys.argv[1]
-    target_exe_path = sys.argv[2]
-    version_file_path = os.path.join(os.path.dirname(target_exe_path), "local_version.txt")
-
-    print("Waiting for target app to close...")
-    time.sleep(3)  # Give time for main app to exit
-
-    print("Downloading latest version...")
-    if download_latest_exe(target_exe_path):
-        with open(version_file_path, "w") as f:
-            f.write(new_version)
-        print("Update complete. Restarting...")
-        os.startfile(target_exe_path)
-    else:
-        print("Failed to download update.")
+    main()

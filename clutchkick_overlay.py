@@ -7,21 +7,17 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import subprocess
 
-# Call the compiled update helper (only when frozen as an .exe)
 def run_updater():
-    if getattr(sys, 'frozen', False):  # Only when running as .exe
+    if getattr(sys, 'frozen', False):
         exe_dir = os.path.dirname(sys.executable)
         updater_path = os.path.join(exe_dir, "update_helper.exe")
         if os.path.exists(updater_path):
             try:
-                result = subprocess.run([updater_path], check=True)
-            except subprocess.CalledProcessError:
-                print("Updater failed to run.")
-        else:
-            print("Updater not found.")
+                subprocess.run([updater_path], check=True)
+            except Exception as e:
+                print(f"Updater error: {e}")
 
-# Run the updater BEFORE anything else
-run_updater()
+run_updater()  # Call updater BEFORE starting anything else
 
 # Determine the path where the .exe or script is located
 def get_exe_path():
