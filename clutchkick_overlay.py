@@ -1,15 +1,23 @@
+import os
+import sys
+import requests
 import irsdk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import os
-import sys
-import requests
 
+# Determine the path where the .exe or script is located
+def get_exe_path():
+    if getattr(sys, 'frozen', False):  # If running as a PyInstaller .exe
+        return sys._MEIPASS
+    return os.path.dirname(os.path.abspath(__file__))
+
+# Define your resources relative to the .exe location
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jackninety9/clutchkick-overlay/main/"
 SCRIPT_NAME = "clutchkick_overlay.py"
-LOCAL_VERSION_FILE = "local_version.txt"
+LOCAL_VERSION_FILE = os.path.join(get_exe_path(), "local_version.txt")
 
+# Functions for version checking and updating
 def get_remote_version():
     try:
         response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
@@ -59,7 +67,6 @@ def check_for_update():
 
 check_for_update()
 
-
 # Initialize the iRacing SDK object
 ir = irsdk.IRSDK()
 
@@ -68,6 +75,9 @@ offset_y = 0
 
 throttle_data = []
 brake_data = []
+
+# (rest of your code...)
+
 
 def update_data(label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
@@ -169,7 +179,7 @@ def create_overlay():
     # Brake Bias Label
     label = tk.Label(
         display_frame,
-        text="Brake Bias: --",
+        text="BB: --",
         font=("AvenirNextLTPro-Bold", 22),
         fg="#ffffff",
         bg="#121212"
