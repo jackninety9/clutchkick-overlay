@@ -73,7 +73,7 @@ def update_data(label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
         try:
             brake_bias = ir['dcBrakeBias']
-            label.config(text=f"BB: {brake_bias:.2f}%" if brake_bias else "BB: --")
+            label.config(text=f"Brake Bias: {brake_bias:.2f}%" if brake_bias else "Brake Bias: --")
 
             throttle_value = ir['Throttle']
             brake_value = ir['Brake']
@@ -169,7 +169,7 @@ def create_overlay():
     # Brake Bias Label
     label = tk.Label(
         display_frame,
-        text="BB: --",
+        text="Brake Bias: --",
         font=("AvenirNextLTPro-Bold", 22),
         fg="#ffffff",
         bg="#121212"
