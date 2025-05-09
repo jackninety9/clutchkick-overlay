@@ -5,6 +5,15 @@ The **Clutchkick Overlay** heavily relies on irsdk and chatgpt, don't expect sta
 
 This program is designed to run as a standalone executable.
 
+## Install
+- **Login to github**
+- Click on Releases (right panel)
+- Select "current_release"
+- Download "current_release.zip"
+- Extract zip into desired location
+- Create shortcut of "clutchkick_overlay.exe"
+- **Launch program when iRacing is running**
+
 ## Features
 - **iRacing Telemetry**: Displays throttle, brake, and brake bias values, gear, speed, and incident count from iRacing.
 - **Real-Time Graph**: Shows throttle and brake input graphs that update dynamically during gameplay.
