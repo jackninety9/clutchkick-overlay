@@ -5,6 +5,7 @@ import irsdk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+import subprocess
 
 # Determine the path where the .exe or script is located
 def get_exe_path():
@@ -50,7 +51,7 @@ def update_script():
         print("Failed to update script:", e)
     return False
 
-import subprocess
+
 
 def check_for_update():
     try:
