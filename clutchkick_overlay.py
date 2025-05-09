@@ -116,8 +116,8 @@ def update_data(label, gear_speed_incident_label, ax, canvas):
                 brake_data.pop(0)
 
             ax.clear()
-            ax.fill_between(range(len(throttle_data)), throttle_data, color='#00bfa6', alpha=1, label='Throttle')
-            ax.fill_between(range(len(brake_data)), brake_data, color='#ff7043', alpha=1, label='Brake')
+            ax.fill_between(range(len(throttle_data)), throttle_data, color='#13d93b', alpha=0.8, label='Throttle')
+            ax.fill_between(range(len(brake_data)), brake_data, color='#d91313', alpha=0.8, label='Brake')
             ax.set_ylim(0, 1)
             ax.axis('off')
             canvas.draw()
