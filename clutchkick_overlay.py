@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 # Determine the path where the .exe or script is located
 def get_exe_path():
     if getattr(sys, 'frozen', False):  # If running as a PyInstaller .exe
-        return sys._MEIPASS
+        return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
 
 # Define your resources relative to the .exe location
@@ -17,7 +17,7 @@ GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jackninety9/clutchkick-over
 SCRIPT_NAME = "clutchkick_overlay.py"
 LOCAL_VERSION_FILE = os.path.join(get_exe_path(), "local_version.txt")
 
-# Functions for version checking and updating
+# Version check & updater (source-only)
 def get_remote_version():
     try:
         response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
@@ -34,6 +34,10 @@ def get_local_version():
     except FileNotFoundError:
         return "0.0.0"
 
+def write_local_version(version):
+    with open(LOCAL_VERSION_FILE, "w") as f:
+        f.write(version)
+
 def update_script():
     try:
         response = requests.get(GITHUB_RAW_BASE + SCRIPT_NAME, timeout=10)
@@ -46,11 +50,11 @@ def update_script():
         print("Failed to update script:", e)
     return False
 
-def write_local_version(version):
-    with open(LOCAL_VERSION_FILE, "w") as f:
-        f.write(version)
-
 def check_for_update():
+    if getattr(sys, 'frozen', False):
+        print("Running from a compiled executable. Auto-update is disabled.")
+        return
+
     remote_version = get_remote_version()
     local_version = get_local_version()
     
@@ -65,9 +69,10 @@ def check_for_update():
     else:
         print("Script is up to date.")
 
+# Run version check (only in source mode)
 check_for_update()
 
-# Initialize the iRacing SDK object
+# Initialize iRacing SDK
 ir = irsdk.IRSDK()
 
 offset_x = 0
@@ -75,9 +80,6 @@ offset_y = 0
 
 throttle_data = []
 brake_data = []
-
-# (rest of your code...)
-
 
 def update_data(label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
@@ -131,9 +133,9 @@ def on_drag(event):
     root.geometry(f'+{x}+{y}')
 
 def close_window():
-    ir.shutdown()  # Ensure iRacing SDK is properly shut down
-    root.quit()  # Stops the Tkinter main loop
-    root.destroy()  # Destroys the window
+    ir.shutdown()
+    root.quit()
+    root.destroy()
 
 def create_overlay():
     global root
@@ -144,7 +146,7 @@ def create_overlay():
     root.attributes('-alpha', 0.9)
     root.attributes('-topmost', True)
 
-    # Screen positioning
+    # Position window
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     window_width = 500
@@ -153,21 +155,15 @@ def create_overlay():
     y_position = int(screen_height * 0.8) - window_height
     root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
 
-    # Display frame
     display_frame = tk.Frame(root, bg='#121212')
     display_frame.pack(expand=True, fill=tk.BOTH)
 
     # Context menu
-    def close_program():
-        ir.shutdown()
-        root.quit()
-        root.destroy()
-
     def show_context_menu(event):
         context_menu.post(event.x_root, event.y_root)
 
     context_menu = tk.Menu(root, tearoff=0)
-    context_menu.add_command(label="Close", command=close_program)
+    context_menu.add_command(label="Close", command=close_window)
 
     # Graph area
     fig, ax = plt.subplots(figsize=(7.5, 0.5), facecolor='#121212')
@@ -196,7 +192,7 @@ def create_overlay():
     )
     gear_speed_incident_label.pack(side=tk.TOP)
 
-    # Move/Context Menu Button (bottom-right overlay)
+    # Move/Context Menu Button
     move_button = tk.Label(
         display_frame,
         text="☰",
