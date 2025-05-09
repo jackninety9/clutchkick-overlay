@@ -50,24 +50,29 @@ def update_script():
         print("Failed to update script:", e)
     return False
 
-def check_for_update():
-    if getattr(sys, 'frozen', False):
-        print("Running from a compiled executable. Auto-update is disabled.")
-        return
+import subprocess
 
-    remote_version = get_remote_version()
-    local_version = get_local_version()
-    
-    if remote_version and remote_version != local_version:
-        print(f"Update available: {local_version} → {remote_version}")
-        if update_script():
-            write_local_version(remote_version)
-            print("Restarting with updated script...")
-            os.execv(sys.executable, [sys.executable] + sys.argv)
-        else:
-            print("Update failed.")
-    else:
-        print("Script is up to date.")
+def check_for_update():
+    try:
+        response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
+        if response.status_code == 200:
+            remote_version = response.text.strip()
+            local_version = get_local_version()
+
+            if remote_version != local_version:
+                print(f"Update available: {local_version} → {remote_version}")
+
+                if getattr(sys, 'frozen', False):
+                    # Launch updater and exit
+                    updater_path = os.path.join(get_exe_path(), "update_helper.exe")
+                    current_exe = sys.executable
+                    subprocess.Popen([updater_path, remote_version, current_exe])
+                    sys.exit()
+                else:
+                    print("Running in script mode. Manual update only.")
+    except Exception as e:
+        print("Error checking for updates:", e)
+
 
 # Run version check (only in source mode)
 check_for_update()
