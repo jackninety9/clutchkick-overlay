@@ -3,14 +3,9 @@ import sys
 import requests
 import irsdk
 import tkinter as tk
-import tkinter.font as tkfont
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import subprocess
-
-#pyinstaller --onefile --noconsole --icon=ryan_gosling.ico clutchkick_overlay.py
-
-# pyinstaller --onefile --add-data "AvenirNextLTPro-Bold.otf;." --add-data "AvenirNextLTPro-Demi.otf;." --icon=ryan_gosling.ico clutchkick_overlay.py
 
 def run_updater():
     if getattr(sys, 'frozen', False):
@@ -22,17 +17,20 @@ def run_updater():
             except Exception as e:
                 print(f"Updater error: {e}")
 
-run_updater()
+run_updater()  # Call updater BEFORE starting anything else
 
+# Determine the path where the .exe or script is located
 def get_exe_path():
-    if getattr(sys, 'frozen', False):
+    if getattr(sys, 'frozen', False):  # If running as a PyInstaller .exe
         return os.path.dirname(sys.executable)
     return os.path.dirname(os.path.abspath(__file__))
 
+# Define your resources relative to the .exe location
 GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jackninety9/clutchkick-overlay/main/"
 SCRIPT_NAME = "clutchkick_overlay.py"
 LOCAL_VERSION_FILE = os.path.join(get_exe_path(), "local_version.txt")
 
+# Version check & updater (source-only)
 def get_remote_version():
     try:
         response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
@@ -65,6 +63,8 @@ def update_script():
         print("Failed to update script:", e)
     return False
 
+
+
 def check_for_update():
     try:
         response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
@@ -74,7 +74,9 @@ def check_for_update():
 
             if remote_version != local_version:
                 print(f"Update available: {local_version} → {remote_version}")
+
                 if getattr(sys, 'frozen', False):
+                    # Launch updater and exit
                     updater_path = os.path.join(get_exe_path(), "update_helper.exe")
                     current_exe = sys.executable
                     subprocess.Popen([updater_path, remote_version, current_exe])
@@ -84,8 +86,11 @@ def check_for_update():
     except Exception as e:
         print("Error checking for updates:", e)
 
+
+# Run version check (only in source mode)
 check_for_update()
 
+# Initialize iRacing SDK
 ir = irsdk.IRSDK()
 
 offset_x = 0
@@ -93,19 +98,6 @@ offset_y = 0
 
 throttle_data = []
 brake_data = []
-
-# FONT LOADER
-def load_custom_fonts():
-    font_dir = get_exe_path()
-    try:
-        tkfont.Font(name="AvenirBold", file=os.path.join(font_dir, "AvenirNextLTPro-Bold.otf"), size=22)
-        tkfont.Font(name="AvenirDemi", file=os.path.join(font_dir, "AvenirNextLTPro-Demi.otf"), size=13)
-        tkfont.Font(name="AvenirSmall", file=os.path.join(font_dir, "AvenirNextLTPro-Bold.otf"), size=8)
-        tkfont.Font(name="AvenirMenu", file=os.path.join(font_dir, "AvenirNextLTPro-Bold.otf"), size=16)
-        return True
-    except Exception as e:
-        print("Font loading failed:", e)
-        return False
 
 def update_data(label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
@@ -172,8 +164,7 @@ def create_overlay():
     root.attributes('-alpha', 0.9)
     root.attributes('-topmost', True)
 
-    font_loaded = load_custom_fonts()
-
+    # Position window
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     window_width = 500
@@ -185,53 +176,62 @@ def create_overlay():
     display_frame = tk.Frame(root, bg='#121212')
     display_frame.pack(expand=True, fill=tk.BOTH)
 
+    # Context menu
     def show_context_menu(event):
         context_menu.post(event.x_root, event.y_root)
 
     context_menu = tk.Menu(root, tearoff=0)
     context_menu.add_command(label="Close", command=close_window)
 
+    # Graph area
     fig, ax = plt.subplots(figsize=(7.5, 0.5), facecolor='#121212')
     canvas = FigureCanvasTkAgg(fig, master=display_frame)
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.configure(bg='#121212', highlightthickness=0, bd=0)
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
+
+    # Spacer to separate graph from version text
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
 
+    # Version Label
     local_version = get_local_version()
     version_label = tk.Label(
         display_frame,
         text=f"v{local_version}",
-        font=("AvenirSmall" if font_loaded else "Arial", 8),
+        font=("Arial", 8),  # More universal fallback font
         fg="#888888",
         bg="#121212"
     )
     version_label.pack(side=tk.TOP, pady=(0, 4))
 
+
+    # Brake Bias Label
     label = tk.Label(
         display_frame,
         text="BB: --",
-        font=("AvenirBold" if font_loaded else "Segoe UI", 22),
+        font=("AvenirNextLTPro-Bold", 22),
         fg="#ffffff",
         bg="#121212"
     )
     label.pack(side=tk.TOP, pady=(0, 2))
 
+    # Gear/Speed/Incidents Label
     gear_speed_incident_label = tk.Label(
         display_frame,
         text="Gear: -- | Speed: -- km/h | Incidents: --x",
-        font=("AvenirDemi" if font_loaded else "Segoe UI", 13),
+        font=("AvenirNextLTPro-Demi", 13),
         fg="#bbbbbb",
         bg="#121212"
     )
     gear_speed_incident_label.pack(side=tk.TOP)
 
+    # Move/Context Menu Button
     move_button = tk.Label(
         display_frame,
         text="☰",
-        font=("AvenirMenu" if font_loaded else "Arial", 16),
+        font=("AvenirNextLTPro-Bold", 16),
         fg="#ffffff",
         bg="#2a2a2a",
         cursor="fleur",
