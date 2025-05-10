@@ -3,7 +3,7 @@
 ## Overview
 The **Clutchkick Overlay** heavily relies on irsdk and chatgpt, don't expect stability or competence. This overlay shows throttle and brake inputs, brake bias, and other telemetry such as speed, gear, and incidents.
 
-This program is designed to run as a standalone executable.
+This program is designed to run as a standalone executable - with the aid of a separate update_helper.exe to check for updates.
 
 ## Install
 - **Login to github**
