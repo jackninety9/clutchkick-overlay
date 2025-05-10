@@ -160,7 +160,7 @@ def create_overlay():
     label = tk.Label(
         display_frame,
         text="BB: --",
-        font=("AvenirNextLTPro-Bold", 22),
+        font=("Aharoni", 22),  # Replaced Avenir with Aharoni
         fg="#ffffff",
         bg="#121212"
     )
@@ -170,7 +170,7 @@ def create_overlay():
     gear_speed_incident_label = tk.Label(
         display_frame,
         text="Gear: -- | Speed: -- km/h | Incidents: --x",
-        font=("AvenirNextLTPro-Demi", 13),
+        font=("Aharoni", 13),  # Replaced Avenir with Aharoni
         fg="#bbbbbb",
         bg="#121212"
     )
@@ -180,7 +180,7 @@ def create_overlay():
     move_button = tk.Label(
         display_frame,
         text="☰",
-        font=("AvenirNextLTPro-Bold", 16),
+        font=("Aharoni", 16),  # Replaced Avenir with Aharoni
         fg="#ffffff",
         bg="#2a2a2a",
         cursor="fleur",
