@@ -2,6 +2,42 @@ import irsdk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+import os
+import subprocess
+import sys
+import time
+
+# pyinstaller --windowed --onefile --icon=images/ryan_gosling.ico clutchkick_overlay.py
+
+def replace_update_helper():
+    if os.path.exists("update_helper_new.exe"):
+        print("Attempting to replace update_helper.exe...")
+        for attempt in range(5):  # Try up to 5 times
+            try:
+                os.remove("update_helper.exe")
+                os.rename("update_helper_new.exe", "update_helper.exe")
+                print("update_helper.exe updated successfully.")
+                return
+            except PermissionError:
+                print(f"Attempt {attempt + 1}: Access denied. Retrying...")
+                time.sleep(1)
+            except Exception as e:
+                print(f"Unexpected error during update_helper.exe replacement: {e}")
+                break
+        print("Failed to replace update_helper.exe after several attempts.")
+
+if "--updated" not in sys.argv:
+    replace_update_helper()
+    subprocess.Popen(["update_helper.exe"])
+    sys.exit()
+    
+def get_local_version():
+    try:
+        with open("local_version.txt", "r") as file:
+            return file.read().strip()
+    except FileNotFoundError:
+        return "unknown"
+
 
 # Initialize iRacing SDK
 ir = irsdk.IRSDK()
@@ -107,17 +143,17 @@ def create_overlay():
     # Spacer to separate graph from version text
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
-
+    
     # Version Label (update after fixing updater)
-    # local_version = get_local_version()
-    # version_label = tk.Label(
-    #     display_frame,
-    #     text=f"v{local_version}",
-    #     font=("Arial", 8),  # More universal fallback font
-    #     fg="#888888",
-    #     bg="#121212"
-    # )
-    # version_label.pack(side=tk.TOP, pady=(0, 4))
+    local_version = get_local_version()
+    version_label = tk.Label(
+        display_frame,
+        text=f"Current Version: v{local_version}",
+        font=("Arial", 8),  # More universal fallback font
+        fg="#888888",
+        bg="#121212"
+    )
+    version_label.pack(side=tk.TOP, pady=(0, 4))
 
 
     # Brake Bias Label
@@ -158,6 +194,8 @@ def create_overlay():
 
     update_data(label, gear_speed_incident_label, ax, canvas)
     root.mainloop()
+
+
 
 if __name__ == "__main__":
     ir.startup()
