@@ -1,94 +1,7 @@
-import os
-import sys
-import requests
 import irsdk
 import tkinter as tk
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
-import subprocess
-
-def run_updater():
-    if getattr(sys, 'frozen', False):
-        exe_dir = os.path.dirname(sys.executable)
-        updater_path = os.path.join(exe_dir, "update_helper.exe")
-        if os.path.exists(updater_path):
-            try:
-                subprocess.run([updater_path], check=True)
-            except Exception as e:
-                print(f"Updater error: {e}")
-
-run_updater()  # Call updater BEFORE starting anything else
-
-# Determine the path where the .exe or script is located
-def get_exe_path():
-    if getattr(sys, 'frozen', False):  # If running as a PyInstaller .exe
-        return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(__file__))
-
-# Define your resources relative to the .exe location
-GITHUB_RAW_BASE = "https://raw.githubusercontent.com/jackninety9/clutchkick-overlay/main/"
-SCRIPT_NAME = "clutchkick_overlay.py"
-LOCAL_VERSION_FILE = os.path.join(get_exe_path(), "local_version.txt")
-
-# Version check & updater (source-only)
-def get_remote_version():
-    try:
-        response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
-        if response.status_code == 200:
-            return response.text.strip()
-    except Exception as e:
-        print("Error fetching remote version:", e)
-    return None
-
-def get_local_version():
-    try:
-        with open(LOCAL_VERSION_FILE, "r") as f:
-            return f.read().strip()
-    except FileNotFoundError:
-        return "0.0.0"
-
-def write_local_version(version):
-    with open(LOCAL_VERSION_FILE, "w") as f:
-        f.write(version)
-
-def update_script():
-    try:
-        response = requests.get(GITHUB_RAW_BASE + SCRIPT_NAME, timeout=10)
-        if response.status_code == 200:
-            with open(SCRIPT_NAME, "w", encoding="utf-8") as f:
-                f.write(response.text)
-            print("Script updated successfully.")
-            return True
-    except Exception as e:
-        print("Failed to update script:", e)
-    return False
-
-
-
-def check_for_update():
-    try:
-        response = requests.get(GITHUB_RAW_BASE + "version.txt", timeout=5)
-        if response.status_code == 200:
-            remote_version = response.text.strip()
-            local_version = get_local_version()
-
-            if remote_version != local_version:
-                print(f"Update available: {local_version} → {remote_version}")
-
-                if getattr(sys, 'frozen', False):
-                    # Launch updater and exit
-                    updater_path = os.path.join(get_exe_path(), "update_helper.exe")
-                    current_exe = sys.executable
-                    subprocess.Popen([updater_path, remote_version, current_exe])
-                    sys.exit()
-                else:
-                    print("Running in script mode. Manual update only.")
-    except Exception as e:
-        print("Error checking for updates:", e)
-
-
-# Run version check (only in source mode)
-check_for_update()
 
 # Initialize iRacing SDK
 ir = irsdk.IRSDK()
@@ -195,16 +108,16 @@ def create_overlay():
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
 
-    # Version Label
-    local_version = get_local_version()
-    version_label = tk.Label(
-        display_frame,
-        text=f"v{local_version}",
-        font=("Arial", 8),  # More universal fallback font
-        fg="#888888",
-        bg="#121212"
-    )
-    version_label.pack(side=tk.TOP, pady=(0, 4))
+    # Version Label (update after fixing updater)
+    # local_version = get_local_version()
+    # version_label = tk.Label(
+    #     display_frame,
+    #     text=f"v{local_version}",
+    #     font=("Arial", 8),  # More universal fallback font
+    #     fg="#888888",
+    #     bg="#121212"
+    # )
+    # version_label.pack(side=tk.TOP, pady=(0, 4))
 
 
     # Brake Bias Label
