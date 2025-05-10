@@ -6,8 +6,10 @@ import os
 import subprocess
 import sys
 import time
+import tkinter.font as tkFont
+from tkinter import TclError
 
-# pyinstaller --windowed --onefile --icon=images/ryan_gosling.ico clutchkick_overlay.py
+# pyinstaller --windowed --onefile --icon=images/ryan_gosling.ico --add-data "fonts/AvenirNextLTPro-Bold.otf;fonts" --add-data "fonts/AvenirNextLTPro-Demi.otf;fonts" clutchkick_overlay.py
 
 def replace_update_helper():
     if os.path.exists("update_helper_new.exe"):
@@ -104,6 +106,21 @@ def close_window():
     root.quit()
     root.destroy()
 
+def load_custom_fonts():
+    fonts = {}
+    try:
+        # Get the path to the bundled fonts folder (PyInstaller includes it in the bundle)
+        fonts_dir = os.path.join(os.path.dirname(sys.executable), 'fonts')
+
+        # Load the two fonts (Bold and Demi)
+        fonts['Bold'] = tkFont.Font(family=os.path.join(fonts_dir, 'AvenirNextLTPro-Bold.otf'), size=22)
+        fonts['Demi'] = tkFont.Font(family=os.path.join(fonts_dir, 'AvenirNextLTPro-Demi.otf'), size=13)
+
+        return fonts
+    except TclError as e:
+        print(f"Failed to load custom fonts: {e}")
+        return None
+
 def create_overlay():
     global root
     root = tk.Tk()
@@ -139,7 +156,6 @@ def create_overlay():
     canvas_widget.configure(bg='#121212', highlightthickness=0, bd=0)
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-
     # Spacer to separate graph from version text
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
@@ -155,12 +171,14 @@ def create_overlay():
     )
     version_label.pack(side=tk.TOP, pady=(0, 4))
 
+    # Load custom fonts
+    fonts = load_custom_fonts()
 
     # Brake Bias Label
     label = tk.Label(
         display_frame,
         text="BB: --",
-        font=("AvenirNextLTPro-Bold", 22),
+        font=fonts['Bold'] if fonts else ("AvenirNextLTPro-Bold", 22),  # Use Bold font if available
         fg="#ffffff",
         bg="#121212"
     )
@@ -170,7 +188,7 @@ def create_overlay():
     gear_speed_incident_label = tk.Label(
         display_frame,
         text="Gear: -- | Speed: -- km/h | Incidents: --x",
-        font=("AvenirNextLTPro-Demi", 13),
+        font=fonts['Demi'] if fonts else ("AvenirNextLTPro-Demi", 13),  # Use Demi font if available
         fg="#bbbbbb",
         bg="#121212"
     )
@@ -194,8 +212,6 @@ def create_overlay():
 
     update_data(label, gear_speed_incident_label, ax, canvas)
     root.mainloop()
-
-
 
 if __name__ == "__main__":
     ir.startup()
