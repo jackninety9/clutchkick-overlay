@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import time
+from datetime import datetime
 
 # pyinstaller --windowed --onefile --icon=images/ryan_gosling.ico clutchkick_overlay.py
 
@@ -37,6 +38,12 @@ def get_local_version():
             return file.read().strip()
     except FileNotFoundError:
         return "unknown"
+    
+def get_system_time():
+    now = datetime.now()
+    current_time = now.strftime("%H:%M")
+    return current_time
+
 
 
 # Initialize iRacing SDK
@@ -144,16 +151,27 @@ def create_overlay():
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
     
-    # Version Label (update after fixing updater)
-    local_version = get_local_version()
-    version_label = tk.Label(
+    # # Version Label (update after fixing updater)
+    # local_version = get_local_version()
+    # version_label = tk.Label(
+    #     display_frame,
+    #     text=f"Current Version: v{local_version}",
+    #     font=("Arial", 8),  # More universal fallback font
+    #     fg="#888888",
+    #     bg="#121212"
+    # )
+    # version_label.pack(side=tk.TOP, pady=(0, 4))
+    
+    # display system time
+    current_time = get_system_time()
+    time_label = tk.Label(
         display_frame,
-        text=f"Current Version: v{local_version}",
-        font=("Arial", 8),  # More universal fallback font
+        text=f"Current Time: {current_time}",
+        font=("Aharoni", 13),  # More universal fallback font
         fg="#888888",
         bg="#121212"
     )
-    version_label.pack(side=tk.TOP, pady=(0, 4))
+    time_label.pack(side=tk.BOTTOM, pady=(0, 4))
 
 
     # Brake Bias Label
