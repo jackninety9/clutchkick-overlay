@@ -13,7 +13,7 @@ from datetime import datetime
 def replace_update_helper():
     if os.path.exists("update_helper_new.exe"):
         print("Attempting to replace update_helper.exe...")
-        for attempt in range(5):  # Try up to 5 times
+        for attempt in range(5):
             try:
                 os.remove("update_helper.exe")
                 os.rename("update_helper_new.exe", "update_helper.exe")
@@ -58,11 +58,11 @@ offset_y = 0
 throttle_data = []
 brake_data = []
 
-def update_data(label, gear_speed_incident_label, ax, canvas):
+def update_data(bb_label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
         try:
             brake_bias = ir['dcBrakeBias']
-            label.config(text=f"BRAKE BIAS: {brake_bias:.2f}%" if brake_bias else "Brake Bias: --")
+            bb_label.config(text=f"Brake Bias: {brake_bias:.2f}%" if brake_bias else "Brake Bias: --")
 
             throttle_value = ir['Throttle']
             brake_value = ir['Brake']
@@ -91,13 +91,13 @@ def update_data(label, gear_speed_incident_label, ax, canvas):
                 else "Gear: -- | Speed: -- km/h | Incidents: --x"
             )
         except KeyError:
-            label.config(text="Brake Bias not available")
+            bb_label.config(text="Brake Bias not available")
             gear_speed_incident_label.config(text="Gear: -- | Speed: -- km/h | Incidents: --x")
     else:
-        label.config(text="Not connected to iRacing")
+        bb_label.config(text="Not connected to iRacing")
         gear_speed_incident_label.config(text="Gear: -- | Speed: -- km/h | Incidents: --x")
 
-    label.after(1, update_data, label, gear_speed_incident_label, ax, canvas)
+    bb_label.after(1, update_data, bb_label, gear_speed_incident_label, ax, canvas)
 
 def on_click(event):
     global offset_x, offset_y
@@ -158,14 +158,14 @@ def create_overlay():
     time_label.pack(side=tk.BOTTOM, pady=(0, 4))
     update_time_label(time_label)
 
-    label = tk.Label(
+    bb_label = tk.Label(
         display_frame,
         text="BB: --",
         font=("Aharoni", 22, "bold"),
         fg="#ffffff",
         bg="#121212"
     )
-    label.pack(side=tk.TOP, pady=(0, 2))
+    bb_label.pack(side=tk.TOP, pady=(0, 2))
 
     gear_speed_incident_label = tk.Label(
         display_frame,
@@ -191,7 +191,7 @@ def create_overlay():
     move_button.bind("<B1-Motion>", on_drag)
     move_button.bind("<Button-3>", show_context_menu)
 
-    update_data(label, gear_speed_incident_label, ax, canvas)
+    update_data(bb_label, gear_speed_incident_label, ax, canvas)
     root.mainloop()
 
 if __name__ == "__main__":
