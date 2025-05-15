@@ -20,7 +20,7 @@ This program is designed to run as a standalone executable - with the aid of a s
 - **Version Checking**: Automatically checks for updates from GitHub repository and updates the script if needed.
 
 ## Technical Details
-- **iRacing SDK**: Utilizes the [iRacing SDK](https://www.iracing.com/sdk/) to access telemetry data.
+- **iRacing SDK**: Utilizes the [iRacing SDK]([https://www.iracing.com/sdk/](https://sajax.github.io/irsdkdocs/)) to access telemetry data.
 - **Matplotlib**: Used for plotting real-time graphs of throttle and brake input data.
 - **Tkinter**: Used for creating the transparent overlay window and displaying telemetry information.
 - **Requests**: Handles automatic updates by downloading the latest script version from GitHub repository.
