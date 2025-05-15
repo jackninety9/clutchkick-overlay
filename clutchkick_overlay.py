@@ -31,18 +31,23 @@ if "--updated" not in sys.argv:
     replace_update_helper()
     subprocess.Popen(["update_helper.exe"])
     sys.exit()
-    
+
 def get_local_version():
     try:
         with open("local_version.txt", "r") as file:
             return file.read().strip()
     except FileNotFoundError:
         return "unknown"
-    
+
 def get_system_time():
     now = datetime.now()
     current_time = now.strftime("%H:%M")
     return current_time
+
+def update_time_label(label):
+    current_time = get_system_time()
+    label.config(text=f"Current Time: {current_time}")
+    label.after(1000, update_time_label, label)  # Update every second
 
 # Initialize iRacing SDK
 ir = irsdk.IRSDK()
@@ -144,17 +149,15 @@ def create_overlay():
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
 
-    current_time = get_system_time()
     time_label = tk.Label(
         display_frame,
-        text=f"Current Time: {current_time}",
         font=("Franklin Gothic Book", 13),
         fg="#888888",
         bg="#121212"
     )
     time_label.pack(side=tk.BOTTOM, pady=(0, 4))
+    update_time_label(time_label)
 
-    # Brake Bias Label (Aharoni)
     label = tk.Label(
         display_frame,
         text="BB: --",
