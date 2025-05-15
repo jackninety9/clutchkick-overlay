@@ -44,8 +44,6 @@ def get_system_time():
     current_time = now.strftime("%H:%M")
     return current_time
 
-
-
 # Initialize iRacing SDK
 ir = irsdk.IRSDK()
 
@@ -59,7 +57,7 @@ def update_data(label, gear_speed_incident_label, ax, canvas):
     if ir.is_initialized and ir.is_connected:
         try:
             brake_bias = ir['dcBrakeBias']
-            label.config(text=f"Brake Bias: {brake_bias:.2f}%" if brake_bias else "Brake Bias: --")
+            label.config(text=f"BRAKE BIAS: {brake_bias:.2f}%" if brake_bias else "Brake Bias: --")
 
             throttle_value = ir['Throttle']
             brake_value = ir['Brake']
@@ -120,7 +118,6 @@ def create_overlay():
     root.attributes('-alpha', 0.9)
     root.attributes('-topmost', True)
 
-    # Position window
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     window_width = 500
@@ -132,73 +129,54 @@ def create_overlay():
     display_frame = tk.Frame(root, bg='#121212')
     display_frame.pack(expand=True, fill=tk.BOTH)
 
-    # Context menu
     def show_context_menu(event):
         context_menu.post(event.x_root, event.y_root)
 
     context_menu = tk.Menu(root, tearoff=0)
     context_menu.add_command(label="Close", command=close_window)
 
-    # Graph area
     fig, ax = plt.subplots(figsize=(7.5, 0.5), facecolor='#121212')
     canvas = FigureCanvasTkAgg(fig, master=display_frame)
     canvas_widget = canvas.get_tk_widget()
     canvas_widget.configure(bg='#121212', highlightthickness=0, bd=0)
     canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
 
-
-    # Spacer to separate graph from version text
     spacer = tk.Frame(display_frame, height=2, bg="#121212")
     spacer.pack(side=tk.TOP)
-    
-    # # Version Label (update after fixing updater)
-    # local_version = get_local_version()
-    # version_label = tk.Label(
-    #     display_frame,
-    #     text=f"Current Version: v{local_version}",
-    #     font=("Arial", 8),  # More universal fallback font
-    #     fg="#888888",
-    #     bg="#121212"
-    # )
-    # version_label.pack(side=tk.TOP, pady=(0, 4))
-    
-    # display system time
+
     current_time = get_system_time()
     time_label = tk.Label(
         display_frame,
         text=f"Current Time: {current_time}",
-        font=("Aharoni", 13),  # More universal fallback font
+        font=("Franklin Gothic Book", 13),
         fg="#888888",
         bg="#121212"
     )
     time_label.pack(side=tk.BOTTOM, pady=(0, 4))
 
-
-    # Brake Bias Label
+    # Brake Bias Label (Aharoni)
     label = tk.Label(
         display_frame,
         text="BB: --",
-        font=("Aharoni", 22),  # Replaced Avenir with Aharoni
+        font=("Aharoni", 22, "bold"),
         fg="#ffffff",
         bg="#121212"
     )
     label.pack(side=tk.TOP, pady=(0, 2))
 
-    # Gear/Speed/Incidents Label
     gear_speed_incident_label = tk.Label(
         display_frame,
         text="Gear: -- | Speed: -- km/h | Incidents: --x",
-        font=("Aharoni", 13),  # Replaced Avenir with Aharoni
+        font=("Franklin Gothic Book", 13),
         fg="#bbbbbb",
         bg="#121212"
     )
     gear_speed_incident_label.pack(side=tk.TOP)
 
-    # Move/Context Menu Button
     move_button = tk.Label(
         display_frame,
         text="☰",
-        font=("Aharoni", 16),  # Replaced Avenir with Aharoni
+        font=("Franklin Gothic Book", 16, "bold"),
         fg="#ffffff",
         bg="#2a2a2a",
         cursor="fleur",
@@ -212,8 +190,6 @@ def create_overlay():
 
     update_data(label, gear_speed_incident_label, ax, canvas)
     root.mainloop()
-
-
 
 if __name__ == "__main__":
     ir.startup()
